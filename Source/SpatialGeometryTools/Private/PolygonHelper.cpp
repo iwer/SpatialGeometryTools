@@ -13,7 +13,7 @@ PolygonHelper::~PolygonHelper()
 {
 }
 
-TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector2D> &vertices)
+TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &vertices)
 {
     using Coord = float;
     using N = uint32_t;
@@ -37,10 +37,11 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector2D> &vertices)
     for(auto &i : indices) {
         ret.Add(i);
     }
+    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Tesselated %d vertices to %d triangles with %d indices"), vertices.Num(), indices.size()/3, ret.Num());
     return ret;
 }
 
-TArray<FVector2D> PolygonHelper::FlatUVMap(const TArray<FVector2D> &vertices)
+TArray<FVector2D> PolygonHelper::FlatUVMap(const TArray<FVector> &vertices)
 {
     TArray<FVector2D> UV0;
     for (auto &v : vertices) {

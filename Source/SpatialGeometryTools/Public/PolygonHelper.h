@@ -14,15 +14,16 @@ public:
     ~PolygonHelper();
 
     /**
-     * Generates triangle indices for a set of vertices.
+     * Generates triangle indices for a set of vertices. Assumes vertices are in X-Y plane.
+     * TODO: This my also work in 3D,  check earcut docs.
      */
-    static TArray<int32> TesselatePolygon(const TArray<FVector2D> &vertices);
+    static TArray<int32> TesselatePolygon(const TArray<FVector> &vertices);
 
     /**
-     * Assumes a polygon in X-Y direction and projects a UV map from Z direction
+     * Assumes a polygon in X-Y plane and projects a UV map from Z direction
      * onto it with 1m raster size.
      */
-    static TArray<FVector2D> FlatUVMap(const TArray<FVector2D> &vertices);
+    static TArray<FVector2D> FlatUVMap(const TArray<FVector> &vertices);
 
     /**
      * Generates a set of vertices that is offset from the original polygon vertices by an equal amount in all directions.
