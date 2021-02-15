@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) Iwer Petersen. All rights reserved.
 
 #pragma once
 
@@ -24,6 +24,12 @@ public:
      * onto it with 1m raster size.
      */
     static TArray<FVector2D> FlatUVMap(const TArray<FVector> &vertices);
+
+    /**
+     * Does the same as FlatUVMap but rotates polygon into x-y plane and therefore does not require vertices to be
+     * in x-y plane beforehand
+     */
+    static TArray<FVector2D> FlatUVMapTilted(const TArray<FVector> &vertices);
 
     /**
      * Generates a set of vertices that is offset from the original polygon vertices by an equal amount in all directions.

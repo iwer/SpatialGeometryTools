@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) Iwer Petersen. All rights reserved.
 
 
 #include "PolygonHelper.h"
 #include <array>
 #include "earcut/earcut.hpp"
+#include "VectorHelper.h"
 
 PolygonHelper::PolygonHelper()
 {
@@ -37,7 +38,7 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &vertices)
     for(auto &i : indices) {
         ret.Add(i);
     }
-    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Tesselated %d vertices to %d triangles with %d indices"), vertices.Num(), indices.size()/3, ret.Num());
+//    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Tesselated %d vertices to %d triangles with %d indices"), vertices.Num(), indices.size()/3, ret.Num());
     return ret;
 }
 
@@ -48,6 +49,26 @@ TArray<FVector2D> PolygonHelper::FlatUVMap(const TArray<FVector> &vertices)
         float X = v.X  / 100.0f;
         float Y = v.Y  / 100.0f;
         UV0.Add(FVector2D(X, Y));
+    }
+    return UV0;
+}
+
+TArray<FVector2D> PolygonHelper::FlatUVMapTilted(const TArray<FVector> &vertices)
+{
+    TArray<FVector2D> UV0;
+    if(vertices.Num() < 3) {
+        return UV0;
+    }
+
+    // get normal of polygon
+    FVector normal = VectorHelper::MakeFaceNormal(vertices[0], vertices[1], vertices[2]);
+
+    // calculate deviation from x-y plane as rotator;
+    FVector up(0,0,1);
+    auto rotator = up.Rotation() - normal.Rotation();
+    for(auto &v : vertices) {
+        // Rotate vector into x-y plane and project in z-direction, scale to meter
+        UV0.Add(FVector2D(rotator.RotateVector(v)) / 100.0f);
     }
     return UV0;
 }
