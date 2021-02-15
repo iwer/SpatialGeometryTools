@@ -16,11 +16,6 @@
     "Installed": false,
     "Modules": [
         {
-            "Name": "Earcut",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "SpatialGeometryTools",
             "Type": "Runtime",
             "LoadingPhase": "Default"
