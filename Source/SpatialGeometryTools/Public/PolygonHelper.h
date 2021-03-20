@@ -14,22 +14,38 @@ public:
     ~PolygonHelper();
 
     /**
-     * Generates triangle indices for a set of vertices. Assumes vertices are in X-Y plane.
-     * TODO: This my also work in 3D,  check earcut docs.
+     * Calculates the area surrounded by this polygon.
      */
-    static TArray<int32> TesselatePolygon(const TArray<FVector> &vertices);
+    static float PolygonArea(const TArray<FVector> &Polygon);
+ 
+    /**
+     * Sort Vertices by their angular order around the center of mass.
+     */
+    static bool AngularSortVertices(TArray<FVector> &Vertices);
+
+
+    /**
+     * Determines if vertices are in clockwise order
+     */
+    static bool IsClockwise(const TArray<FVector> &Polygon);
+ 
+    /**
+     * Generates triangle indices for a set of vertices. Assumes vertices are in X-Y plane.
+     * TODO: This may also work in 3D,  check earcut docs.
+     */
+    static TArray<int32> TesselatePolygon(const TArray<FVector> &Vertices);
 
     /**
      * Assumes a polygon in X-Y plane and projects a UV map from Z direction
      * onto it with 1m raster size.
      */
-    static TArray<FVector2D> FlatUVMap(const TArray<FVector> &vertices);
+    static TArray<FVector2D> FlatUVMap(const TArray<FVector> &Vertices);
 
     /**
      * Does the same as FlatUVMap but rotates polygon into x-y plane and therefore does not require vertices to be
      * in x-y plane beforehand
      */
-    static TArray<FVector2D> FlatUVMapTilted(const TArray<FVector> &vertices);
+    static TArray<FVector2D> FlatUVMapTilted(const TArray<FVector> &Vertices);
 
     /**
      * Generates a set of vertices that is offset from the original polygon vertices by an equal amount in all directions.
@@ -37,5 +53,5 @@ public:
      * This implementation is inspired by https://stackoverflow.com/questions/54033808/how-to-offset-polygon-edges
      * it assumes that incomming vertices are in clockwise order
      */
-    static TArray<FVector> GenerateOffsetVertices(const TArray<FVector> &vertices, float offset, float heightdifference);
+    static TArray<FVector> GenerateOffsetVertices(const TArray<FVector> &Vertices, float Offset, float HeightDifference);
 };

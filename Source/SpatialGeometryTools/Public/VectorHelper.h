@@ -14,5 +14,6 @@ public:
     ~VectorHelper();
 
     static FVector MakeFaceNormal(const FVector &v1, const FVector &v2, const FVector &v3);
+    static bool IsLine(TArray<FVector> vertices);
 };
     
