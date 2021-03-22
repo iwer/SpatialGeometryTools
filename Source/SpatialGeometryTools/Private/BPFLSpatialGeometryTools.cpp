@@ -4,6 +4,7 @@
 #include "BPFLSpatialGeometryTools.h"
 #include "VectorHelper.h"
 #include "PolygonHelper.h"
+#include "GeometryDataHelper.h"
 
 FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool bClockwise)
 {
@@ -26,8 +27,25 @@ FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool
     return data;
 }
 
+FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> Vertices, float Distance)
+{
+    FGeometryData data;
+
+    auto OffsetVertices = PolygonHelper::GenerateOffsetVertices(Vertices, 0, Distance);
+
+    // for each Vertices Add Quad
+    for(int32 i = 0; i < Vertices.Num(); ++i) {
+        auto P0 = Vertices[i];
+        auto P1 = Vertices[(i + 1) % Vertices.Num()];
+        auto P0a = OffsetVertices[i];
+        auto P1a = OffsetVertices[(i + 1) % Vertices.Num()];
+        GeometryDataHelper::AppendQuad(data, P0, P1, P0a, P1a);
+    }
+
+    return data;
+}
+
 void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, bool bClockwise)
 {
     PolygonHelper::AngularSortVertices(Vertices,bClockwise);
 }
-
