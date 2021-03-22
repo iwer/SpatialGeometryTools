@@ -17,8 +17,9 @@ class SPATIALGEOMETRYTOOLS_API UBPFLSpatialGeometryTools : public UBlueprintFunc
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
-	static FGeometryData MakeFace(TArray<FVector> vertices);
+	static FGeometryData MakeFace(TArray<FVector> Vertices, bool bClockwise);
 
-	
+	UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
+	static void SortVerticesByAngle(UPARAM(ref) TArray<FVector> &Vertices, bool bClockwise);
 	
 };

@@ -29,9 +29,30 @@ float PolygonHelper::PolygonArea(const TArray<FVector>& Polygon)
     return A;
 }
 
-bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices)
+bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices, bool bClockwise)
 {
-    return true;
+    FVector Com = VectorHelper::CenterOfMass(Vertices);
+    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Com %s"), *Com.ToString())
+    bool bIsDefinite = true;
+    Vertices.Sort([Com, &bIsDefinite, bClockwise](const FVector& V0, const FVector &V1)
+    {
+        const FVector LVec0 = V0 - Com;
+        const FVector LVec1 = V1 - Com;
+
+        const float Ang0 = FMath::Atan2(LVec0.Y, LVec0.X);
+        const float Ang1 = FMath::Atan2(LVec1.Y, LVec1.X);
+
+        UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Ang0 %f, Ang1 %f"), Ang0, Ang1)
+        
+        if(Ang0 == Ang1)
+            bIsDefinite = false;
+        if(bClockwise)
+            return Ang0 > Ang1;
+        else
+            return Ang0 < Ang1;
+    });
+    
+    return bIsDefinite;
 }
 
 bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
@@ -39,25 +60,26 @@ bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
     return PolygonHelper::PolygonArea(Polygon) < 0;
 }
 
-TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices)
+TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, bool bClockwise)
 {
     TArray<FVector> Verts = Vertices;
-    if(PolygonHelper::IsClockwise(Vertices))
-    {
-        Algo::Reverse(Verts);
-    }
+    
+    // if(PolygonHelper::IsClockwise(Vertices))
+    // {
+    //     Algo::Reverse(Verts);
+    // }
   
     
     using Coord = float;
     using N = uint32_t;
-    using Point = std::array<Coord,2>;
+    using FPoint = std::array<Coord,2>;
 
-    std::vector<std::vector<Point>> Polygon;
-    const std::vector<Point> Shape;
+    std::vector<std::vector<FPoint>> Polygon;
+    const std::vector<FPoint> Shape;
     Polygon.push_back(Shape);
 
     for(auto &Vertex : Verts) {
-        Point p;
+        FPoint p;
         p[0] = Vertex.X;
         p[1] = Vertex.Y;
         Polygon[0].push_back(p);
@@ -67,8 +89,20 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices)
     std::vector<N> Indices = mapbox::earcut<N>(Polygon);
 
     TArray<int32> Ret;
-    for(auto &i : Indices) {
-        Ret.Add(i);
+    for(int i = 0; i < Indices.size() - 2; i += 3) {
+        if(bClockwise)
+        {
+            Ret.Add(Indices[i]);
+            Ret.Add(Indices[i+1]);
+            Ret.Add(Indices[i+2]);
+        }
+        else
+        {
+            Ret.Add(Indices[i+2]);
+            Ret.Add(Indices[i+1]);
+            Ret.Add(Indices[i]);
+        }
+        
     }
 //    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Tesselated %d vertices to %d triangles with %d indices"), vertices.Num(), indices.size()/3, ret.Num());
     return Ret;

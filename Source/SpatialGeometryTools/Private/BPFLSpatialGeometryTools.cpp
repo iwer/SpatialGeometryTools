@@ -5,24 +5,29 @@
 #include "VectorHelper.h"
 #include "PolygonHelper.h"
 
-FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> vertices)
+FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool bClockwise)
 {
     FGeometryData data;
-    data.Vertices = vertices;
+    data.Vertices = Vertices;
 
     // if we have less than 3 vertices or all vertices are in line
     // we cant make a face
-    if(vertices.Num() < 3
-        || VectorHelper::IsLine(vertices)) {
+    if(Vertices.Num() < 3
+        || VectorHelper::IsLine(Vertices)) {
         return data;
     }
 
-    data.Indices = PolygonHelper::TesselatePolygon(vertices);
-    data.Normals.Init(VectorHelper::MakeFaceNormal(vertices[0], vertices[1], vertices[2]), vertices.Num());
+    data.Indices = PolygonHelper::TesselatePolygon(Vertices, bClockwise);
+    data.Normals.Init(VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]), Vertices.Num());
 
-    data.TexCoords = PolygonHelper::FlatUVMapTilted(vertices);
-    data.Colors.Init(FLinearColor(0,0,0,1), vertices.Num());
-    data.Tangents.Init(FVector(1,0,0), vertices.Num());
+    data.TexCoords = PolygonHelper::FlatUVMapTilted(Vertices);
+    data.Colors.Init(FLinearColor(0,0,0,1), Vertices.Num());
+    data.Tangents.Init(FVector(1,0,0), Vertices.Num());
     return data;
+}
+
+void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, bool bClockwise)
+{
+    PolygonHelper::AngularSortVertices(Vertices,bClockwise);
 }
 

@@ -13,7 +13,8 @@ public:
     VectorHelper();
     ~VectorHelper();
 
-    static FVector MakeFaceNormal(const FVector &v1, const FVector &v2, const FVector &v3);
-    static bool IsLine(TArray<FVector> vertices);
+    static FVector MakeFaceNormal(const FVector &V0, const FVector &V1, const FVector &V2);
+	static FVector CenterOfMass(const TArray<FVector> &Vertices);
+    static bool IsLine(TArray<FVector> Vertices);
 };
     

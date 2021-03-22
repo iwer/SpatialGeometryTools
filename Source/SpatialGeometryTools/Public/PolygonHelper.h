@@ -17,23 +17,24 @@ public:
      * Calculates the area surrounded by this polygon.
      */
     static float PolygonArea(const TArray<FVector> &Polygon);
- 
+
     /**
      * Sort Vertices by their angular order around the center of mass.
+     * Returns true if order is definite (no ambiguous angles).
      */
-    static bool AngularSortVertices(TArray<FVector> &Vertices);
+    static bool AngularSortVertices(TArray<FVector> &Vertices, bool bClockwise = true);
 
-
+    static bool IsConvex(const TArray<FVector> &Polygon);
     /**
      * Determines if vertices are in clockwise order
      */
     static bool IsClockwise(const TArray<FVector> &Polygon);
- 
+
     /**
      * Generates triangle indices for a set of vertices. Assumes vertices are in X-Y plane.
      * TODO: This may also work in 3D,  check earcut docs.
      */
-    static TArray<int32> TesselatePolygon(const TArray<FVector> &Vertices);
+    static TArray<int32> TesselatePolygon(const TArray<FVector> &Vertices, bool bClockwise);
 
     /**
      * Assumes a polygon in X-Y plane and projects a UV map from Z direction
