@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) Iwer Petersen. All rights reserved.
 
 
 #include "PolygonHelper.h"
 #include <array>
 #include "earcut/earcut.hpp"
+#include "VectorHelper.h"
 
 PolygonHelper::PolygonHelper()
 {
@@ -13,75 +14,174 @@ PolygonHelper::~PolygonHelper()
 {
 }
 
-TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector2D> &vertices)
+float PolygonHelper::PolygonArea(const TArray<FVector>& Polygon)
 {
+    float A = 0;
+    const int32 N = Polygon.Num();
+
+    for(int32 i = 0; i < N; ++i) {
+        const auto P0 = Polygon[i];
+        const auto P1 = Polygon[(i + 1) % N];
+
+        A += (P1.X - P0.X) * (P1.Y + P0.Y);
+    }
+
+    return A;
+}
+
+bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices, bool bClockwise)
+{
+    FVector Com = VectorHelper::CenterOfMass(Vertices);
+    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Com %s"), *Com.ToString())
+    bool bIsDefinite = true;
+    Vertices.Sort([Com, &bIsDefinite, bClockwise](const FVector& V0, const FVector &V1)
+    {
+        const FVector LVec0 = V0 - Com;
+        const FVector LVec1 = V1 - Com;
+
+        const float Ang0 = FMath::Atan2(LVec0.Y, LVec0.X);
+        const float Ang1 = FMath::Atan2(LVec1.Y, LVec1.X);
+
+        UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Ang0 %f, Ang1 %f"), Ang0, Ang1)
+        
+        if(Ang0 == Ang1)
+            bIsDefinite = false;
+        if(bClockwise)
+            return Ang0 > Ang1;
+        else
+            return Ang0 < Ang1;
+    });
+    
+    return bIsDefinite;
+}
+
+bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
+{
+    return PolygonHelper::PolygonArea(Polygon) < 0;
+}
+
+TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, bool bClockwise)
+{
+    TArray<FVector> Verts = Vertices;
+    
+    // if(PolygonHelper::IsClockwise(Vertices))
+    // {
+    //     Algo::Reverse(Verts);
+    // }
+  
+    
     using Coord = float;
     using N = uint32_t;
-    using Point = std::array<Coord,2>;
+    using FPoint = std::array<Coord,2>;
 
-    std::vector<std::vector<Point>> polygon;
-    std::vector<Point> shape;
-    polygon.push_back(shape);
+    std::vector<std::vector<FPoint>> Polygon;
+    const std::vector<FPoint> Shape;
+    Polygon.push_back(Shape);
 
-    for(auto &vertex : vertices) {
-        Point p;
-        p[0] = vertex.X;
-        p[1] = vertex.Y;
-        polygon[0].push_back(p);
+    for(auto &Vertex : Verts) {
+        FPoint p;
+        p[0] = Vertex.X;
+        p[1] = Vertex.Y;
+        Polygon[0].push_back(p);
     }
 
     // tesselate using earcut
-    std::vector<N> indices = mapbox::earcut<N>(polygon);
+    std::vector<N> Indices = mapbox::earcut<N>(Polygon);
 
-    TArray<int32> ret;
-    for(auto &i : indices) {
-        ret.Add(i);
+    TArray<int32> Ret;
+    for(int i = 0; i < Indices.size() - 2; i += 3) {
+        if(bClockwise)
+        {
+            Ret.Add(Indices[i]);
+            Ret.Add(Indices[i+1]);
+            Ret.Add(Indices[i+2]);
+        }
+        else
+        {
+            Ret.Add(Indices[i+2]);
+            Ret.Add(Indices[i+1]);
+            Ret.Add(Indices[i]);
+        }
+        
     }
-    return ret;
+//    UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Tesselated %d vertices to %d triangles with %d indices"), vertices.Num(), indices.size()/3, ret.Num());
+    return Ret;
 }
 
-TArray<FVector2D> PolygonHelper::FlatUVMap(const TArray<FVector2D> &vertices)
+TArray<FVector2D> PolygonHelper::FlatUVMap(const TArray<FVector> &Vertices)
 {
     TArray<FVector2D> UV0;
-    for (auto &v : vertices) {
-        float X = v.X  / 100.0f;
-        float Y = v.Y  / 100.0f;
+    for (auto &v : Vertices) {
+        const float X = v.X  / 100.0f;
+        const float Y = v.Y  / 100.0f;
         UV0.Add(FVector2D(X, Y));
     }
     return UV0;
 }
 
-TArray<FVector> PolygonHelper::GenerateOffsetVertices(const TArray<FVector> &vertices, float offset, float heightdifference)
+TArray<FVector2D> PolygonHelper::FlatUVMapTilted(const TArray<FVector> &Vertices)
 {
-    TArray<FVector> offVertices;
-
-    FVector up(0,0,-1);
-
-    int n = vertices.Num();
-    for(int i = 0; i < n; ++i) {
-        FVector p0 = vertices[i]; // current vertex
-        FVector p1 = vertices[(i + 1) % n]; // next vertex
-        FVector pn = vertices[(i + n - 1) % n]; // precious vertex
-
-        // calculate normals of incoming and outgoing edge
-        FVector na = FVector::CrossProduct(p0-p1, up);
-        na.Normalize(.0001);
-        FVector nb = FVector::CrossProduct(pn-p0, up);
-        nb.Normalize(.0001);
-
-        // calculate normalized bisect vector
-        FVector bisector = na + nb;
-        bisector.Normalize(.0001);
-
-        // calculate length along bisector to meet offset
-        float biLen = offset / FGenericPlatformMath::Sqrt(1 + FVector::DotProduct(na, nb));
-
-        // calculate offset vertex
-        auto offVert = p0 + biLen * bisector;
-        // add heigth difference
-        offVert.Z -= (2 * heightdifference);
-        offVertices.Add(offVert);
+    TArray<FVector2D> UV0;
+    if(Vertices.Num() < 3) {
+        return UV0;
     }
 
-    return offVertices;
+    // get normal of polygon
+    const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
+
+    FVector UP;
+    if(PolygonHelper::IsClockwise(Vertices)) {
+        UP = FVector(0,0,-1);
+    } else {
+        UP = FVector(0,0,1);
+    }
+
+    // calculate deviation from x-y plane as rotator;
+    const auto Rotator = UP.Rotation() - Normal.Rotation();
+    for(auto &v : Vertices) {
+        // Rotate vector into x-y plane and project in z-direction, scale to meter
+        UV0.Add(FVector2D(Rotator.RotateVector(v)) / 100.0f);
+    }
+    return UV0;
+}
+
+TArray<FVector> PolygonHelper::GenerateOffsetVertices(const TArray<FVector> &Vertices, float Offset, float HeightDifference)
+{
+    TArray<FVector> OffVertices;
+
+    FVector UP;
+    if(PolygonHelper::IsClockwise(Vertices)) {
+        UP = FVector(0,0,-1);
+    } else {
+        UP = FVector(0,0,1);
+    }
+
+
+    const int n = Vertices.Num();
+    for(int i = 0; i < n; ++i) {
+        FVector P0 = Vertices[i]; // current vertex
+        FVector P1 = Vertices[(i + 1) % n]; // next vertex
+        FVector PN = Vertices[(i + n - 1) % n]; // previous vertex
+
+        // calculate normals of incoming and outgoing edge
+        FVector Na = FVector::CrossProduct(P0-P1, UP);
+        Na.Normalize(.0001);
+        FVector Nb = FVector::CrossProduct(PN-P0, UP);
+        Nb.Normalize(.0001);
+
+        // calculate normalized bisect vector
+        FVector Bisector = Na + Nb;
+        Bisector.Normalize(.0001);
+
+        // calculate length along bisector to meet offset
+        const float BiLen = Offset / FGenericPlatformMath::Sqrt(1 + FVector::DotProduct(Na, Nb));
+
+        // calculate offset vertex
+        auto OffVert = P0 + BiLen * Bisector;
+        // add height difference
+        OffVert.Z -= (2 * HeightDifference);
+        OffVertices.Add(OffVert);
+    }
+
+    return OffVertices;
 }
