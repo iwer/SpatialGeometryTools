@@ -6,13 +6,13 @@
     "Description": "Handy tools in spatial geometry useful for generative geometry",
     "Category": "Other",
     "CreatedBy": "Iwer Petersen",
-    "CreatedByURL": "",
+    "CreatedByURL": "https://github.com/iwer",
     "DocsURL": "",
     "MarketplaceURL": "",
-    "SupportURL": "",
+    "SupportURL": "https://github.com/iwer/SpatialGeometryTools",
     "CanContainContent": true,
     "IsBetaVersion": false,
-    "IsExperimentalVersion": false,
+    "IsExperimentalVersion": true,
     "Installed": false,
     "Modules": [
         {
