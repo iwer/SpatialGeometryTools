@@ -16,13 +16,22 @@ class SPATIALGEOMETRYTOOLS_API UBPFLSpatialGeometryTools : public UBlueprintFunc
 {
     GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Vector")
+	static FVector GetCenterOfMass(TArray<FVector> Vertices);
+	
     UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
     static FGeometryData MakeFace(TArray<FVector> Vertices, bool bClockwise);
 
     UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
-    static FGeometryData ExtrudeFaceAlongNormal(TArray<FVector> Vertices, float Distance);
+    static FGeometryData ExtrudeFaceAlongNormal(TArray<FVector> Vertices, const float Distance);
 
+	UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
+	static bool IsClockwise(TArray<FVector> Polygon);
+
+	UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
+	static bool IsConvex(TArray<FVector> Polygon);
+	
     UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
-    static void SortVerticesByAngle(UPARAM(ref) TArray<FVector> &Vertices, bool bClockwise);
+    static void SortVerticesByAngle(UPARAM(ref) TArray<FVector> &Vertices, const bool bClockwise);
 
 };

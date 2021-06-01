@@ -55,6 +55,35 @@ bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices, bool bClockwi
     return bIsDefinite;
 }
 
+bool PolygonHelper::IsConvex(const TArray<FVector>& Polygon)
+{
+    // no polygon with less than three vertices
+    if(Polygon.Num() < 3)
+        return false;
+    
+    // determine if z-component of crossproduct of consecutive edges all have the same sign
+    bool allPositive = false;
+    for(int i = 0; i < Polygon.Num(); ++i)
+    {
+        float dx1 = Polygon[(i+1) % Polygon.Num()].X - Polygon[i].X;
+        float dy1 = Polygon[(i+1) % Polygon.Num()].Y - Polygon[i].Y;
+        float dx2 = Polygon[(i+2) % Polygon.Num()].X - Polygon[(i+1) % Polygon.Num()].X;
+        float dy2 = Polygon[(i+2) % Polygon.Num()].Y - Polygon[(i+1) % Polygon.Num()].Y;
+
+        float zcross = dx1 * dy2 - dy1 * dx2;
+
+        if(i==0)
+            allPositive = zcross > 0;
+        else if ((zcross > 0) != allPositive)
+        {
+            // at least one corner is not convex
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
 {
     return PolygonHelper::PolygonArea(Polygon) < 0;
