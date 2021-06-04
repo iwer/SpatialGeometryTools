@@ -157,19 +157,21 @@ TArray<FVector2D> PolygonHelper::FlatUVMapTilted(const TArray<FVector> &Vertices
 
     // get normal of polygon
     const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
-
+    FVector Forward = (Vertices[1] - Vertices[0]).GetSafeNormal(.0001);
+    FVector Right = FVector::CrossProduct(Normal, Forward);
+    
     FVector UP;
     if(PolygonHelper::IsClockwise(Vertices)) {
         UP = FVector(0,0,-1);
     } else {
         UP = FVector(0,0,1);
     }
-
     // calculate deviation from x-y plane as rotator;
-    const auto Rotator = UP.Rotation() - Normal.Rotation();
+    const auto Rotator = FMatrix(Right, Forward, Normal, FVector::ZeroVector).Rotator();
+    
     for(auto &v : Vertices) {
-        // Rotate vector into x-y plane and project in z-direction, scale to meter
-        UV0.Add(FVector2D(Rotator.RotateVector(v)) / 100.0f);
+        // Un-Rotate vector into x-y plane and project in z-direction, scale to meter
+        UV0.Add(FVector2D(Rotator.UnrotateVector(v)) / 100.0f);
     }
     return UV0;
 }
@@ -208,7 +210,7 @@ TArray<FVector> PolygonHelper::GenerateOffsetVertices(const TArray<FVector> &Ver
         // calculate offset vertex
         auto OffVert = P0 + BiLen * Bisector;
         // add height difference
-        OffVert.Z -= (2 * HeightDifference);
+        OffVert.Z -= HeightDifference;
         OffVertices.Add(OffVert);
     }
 

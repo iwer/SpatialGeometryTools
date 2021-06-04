@@ -2,6 +2,9 @@
 
 
 #include "GeometryDataHelper.h"
+#include "PolygonHelper.h"
+#include "VectorHelper.h"
+
 
 GeometryDataHelper::GeometryDataHelper()
 {
@@ -26,9 +29,10 @@ void GeometryDataHelper::AppendQuad(FGeometryData &data, const FVector &P0, cons
     // triangle p1a, p0a, p1
     data.Indices.Append({StartIdx + 3, StartIdx + 2, StartIdx});
 
-    FVector FaceNormal = VectorHelper::MakeFaceNormal(P0, P1, P0a);
+    FVector FaceNormal = VectorHelper::MakeFaceNormal(P0, P0a, P1);
     FVector Tangent = (P1 - P0).GetSafeNormal(.0001);
-
+    FVector Cotangent = FVector::CrossProduct(Tangent, FaceNormal);
+    
     TArray<FVector> Normals;
     TArray<FLinearColor> Colors;
     TArray<FVector> Tangents;
@@ -42,12 +46,13 @@ void GeometryDataHelper::AppendQuad(FGeometryData &data, const FVector &P0, cons
     Colors.Init(FLinearColor(0, 0, 0, 1), 4);
     data.Colors.Append(Colors);
 
-    FVector UP(0,0,1);
-    auto Rotator = UP.Rotation() - FaceNormal.Rotation();
-    FVector uv0 = Rotator.RotateVector(P0) / 100;
-    FVector uv1 = Rotator.RotateVector(P1) / 100;
-    FVector uv0a = Rotator.RotateVector(P0a) / 100;
-    FVector uv1a = Rotator.RotateVector(P1a) / 100;
+    FVector UP(0,0,-1);
+    //auto Rotator = UP.Rotation() - FaceNormal.Rotation();
+    auto Rotator = FMatrix(Cotangent, Tangent, FaceNormal, FVector::ZeroVector).Rotator();
+    FVector uv0 = Rotator.UnrotateVector(P0) / 100;
+    FVector uv1 = Rotator.UnrotateVector(P1) / 100;
+    FVector uv0a = Rotator.UnrotateVector(P0a) / 100;
+    FVector uv1a = Rotator.UnrotateVector(P1a) / 100;
 
     data.TexCoords.Add(FVector2D(uv0));
     data.TexCoords.Add(FVector2D(uv1));

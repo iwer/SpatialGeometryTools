@@ -2,6 +2,7 @@
 
 
 #include "BPFLSpatialGeometryTools.h"
+
 #include "VectorHelper.h"
 #include "PolygonHelper.h"
 #include "GeometryDataHelper.h"
@@ -46,7 +47,7 @@ FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> 
         auto P1a = OffsetVertices[(i + 1) % Vertices.Num()];
         GeometryDataHelper::AppendQuad(data, P0, P1, P0a, P1a);
     }
-
+    
     return data;
 }
 
