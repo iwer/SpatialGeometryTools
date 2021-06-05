@@ -2,9 +2,15 @@
 
 
 #include "BPFLSpatialGeometryTools.h"
+
 #include "VectorHelper.h"
 #include "PolygonHelper.h"
 #include "GeometryDataHelper.h"
+
+FVector UBPFLSpatialGeometryTools::GetCenterOfMass(TArray<FVector> Vertices)
+{
+    return VectorHelper::CenterOfMass(Vertices);
+}
 
 FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool bClockwise)
 {
@@ -27,7 +33,7 @@ FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool
     return data;
 }
 
-FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> Vertices, float Distance)
+FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> Vertices, const float Distance)
 {
     FGeometryData data;
 
@@ -41,11 +47,21 @@ FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> 
         auto P1a = OffsetVertices[(i + 1) % Vertices.Num()];
         GeometryDataHelper::AppendQuad(data, P0, P1, P0a, P1a);
     }
-
+    
     return data;
 }
 
-void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, bool bClockwise)
+bool UBPFLSpatialGeometryTools::IsClockwise(TArray<FVector> Polygon)
+{
+    return PolygonHelper::IsClockwise(Polygon);
+}
+
+bool UBPFLSpatialGeometryTools::IsConvex(TArray<FVector> Polygon)
+{
+    return PolygonHelper::IsConvex(Polygon);
+}
+
+void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, const bool bClockwise)
 {
     PolygonHelper::AngularSortVertices(Vertices,bClockwise);
 }

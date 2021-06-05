@@ -55,6 +55,35 @@ bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices, bool bClockwi
     return bIsDefinite;
 }
 
+bool PolygonHelper::IsConvex(const TArray<FVector>& Polygon)
+{
+    // no polygon with less than three vertices
+    if(Polygon.Num() < 3)
+        return false;
+    
+    // determine if z-component of crossproduct of consecutive edges all have the same sign
+    bool allPositive = false;
+    for(int i = 0; i < Polygon.Num(); ++i)
+    {
+        float dx1 = Polygon[(i+1) % Polygon.Num()].X - Polygon[i].X;
+        float dy1 = Polygon[(i+1) % Polygon.Num()].Y - Polygon[i].Y;
+        float dx2 = Polygon[(i+2) % Polygon.Num()].X - Polygon[(i+1) % Polygon.Num()].X;
+        float dy2 = Polygon[(i+2) % Polygon.Num()].Y - Polygon[(i+1) % Polygon.Num()].Y;
+
+        float zcross = dx1 * dy2 - dy1 * dx2;
+
+        if(i==0)
+            allPositive = zcross > 0;
+        else if ((zcross > 0) != allPositive)
+        {
+            // at least one corner is not convex
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
 {
     return PolygonHelper::PolygonArea(Polygon) < 0;
@@ -128,19 +157,21 @@ TArray<FVector2D> PolygonHelper::FlatUVMapTilted(const TArray<FVector> &Vertices
 
     // get normal of polygon
     const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
-
+    FVector Forward = (Vertices[1] - Vertices[0]).GetSafeNormal(.0001);
+    FVector Right = FVector::CrossProduct(Normal, Forward);
+    
     FVector UP;
     if(PolygonHelper::IsClockwise(Vertices)) {
         UP = FVector(0,0,-1);
     } else {
         UP = FVector(0,0,1);
     }
-
     // calculate deviation from x-y plane as rotator;
-    const auto Rotator = UP.Rotation() - Normal.Rotation();
+    const auto Rotator = FMatrix(Right, Forward, Normal, FVector::ZeroVector).Rotator();
+    
     for(auto &v : Vertices) {
-        // Rotate vector into x-y plane and project in z-direction, scale to meter
-        UV0.Add(FVector2D(Rotator.RotateVector(v)) / 100.0f);
+        // Un-Rotate vector into x-y plane and project in z-direction, scale to meter
+        UV0.Add(FVector2D(Rotator.UnrotateVector(v)) / 100.0f);
     }
     return UV0;
 }
@@ -179,7 +210,7 @@ TArray<FVector> PolygonHelper::GenerateOffsetVertices(const TArray<FVector> &Ver
         // calculate offset vertex
         auto OffVert = P0 + BiLen * Bisector;
         // add height difference
-        OffVert.Z -= (2 * HeightDifference);
+        OffVert.Z -= HeightDifference;
         OffVertices.Add(OffVert);
     }
 
