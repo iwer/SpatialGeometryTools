@@ -50,8 +50,13 @@ void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, c
     PolygonHelper::AngularSortVertices(Vertices,bClockwise);
 }
 
-void UBPFLSpatialGeometryTools::SaveStaticMesh(FGeometryData& Geometry, FString ObjectName, FString AssetPath,
-    UMaterialInterface* Material)
+void UBPFLSpatialGeometryTools::ConcatenateGeometryData(FGeometryData& Base, FGeometryData& Appender)
 {
-    GeometryDataHelper::CreateStaticMeshAsset(Geometry, ObjectName, AssetPath, Material);
+    GeometryDataHelper::AppendGeometryData(Base, Appender);
+}
+
+UStaticMesh *  UBPFLSpatialGeometryTools::SaveStaticMesh(FGeometryData& Geometry, FString ObjectName, FString AssetPath,
+                                               UMaterialInterface* Material)
+{
+    return GeometryDataHelper::CreateStaticMeshAsset(Geometry, ObjectName, AssetPath, Material);
 }

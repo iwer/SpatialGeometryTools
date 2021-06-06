@@ -84,7 +84,23 @@ void GeometryDataHelper::AppendQuad(FGeometryData &data, const FVector &P0, cons
     data.TexCoords.Add(FVector2D(uv1a));
 }
 
-void GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
+void GeometryDataHelper::AppendGeometryData(FGeometryData& Root, FGeometryData& Appendage)
+{
+    const int RootVertices = Root.Vertices.Num();
+
+    Root.Vertices.Append(Appendage.Vertices);
+    Root.Colors.Append(Appendage.Colors);
+    Root.Normals.Append(Appendage.Normals);
+    Root.Tangents.Append(Appendage.Tangents);
+    Root.TexCoords.Append(Appendage.TexCoords);
+
+    for(auto &Idx : Appendage.Indices)
+    {
+        Root.Indices.Add(RootVertices + Idx);
+    }
+}
+
+UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
 {
     UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
         Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
@@ -116,13 +132,13 @@ void GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geometry, FSt
             RawMesh.WedgeIndices.Add(Geometry.Indices[i+1]);
             RawMesh.WedgeIndices.Add(Geometry.Indices[i+2]);
 
-            RawMesh.WedgeColors.Add(ColorBlack);
-            RawMesh.WedgeColors.Add(ColorBlack);
-            RawMesh.WedgeColors.Add(ColorBlack);
+            RawMesh.WedgeColors.Add(Geometry.Colors[Geometry.Indices[i+0]].ToFColor(false));
+            RawMesh.WedgeColors.Add(Geometry.Colors[Geometry.Indices[i+1]].ToFColor(false));
+            RawMesh.WedgeColors.Add(Geometry.Colors[Geometry.Indices[i+2]].ToFColor(false));
 
-            RawMesh.WedgeTangentX.Add(FVector::ZeroVector);
-            RawMesh.WedgeTangentX.Add(FVector::ZeroVector);
-            RawMesh.WedgeTangentX.Add(FVector::ZeroVector);
+            RawMesh.WedgeTangentX.Add(Geometry.Tangents[Geometry.Indices[i+0]].TangentX);
+            RawMesh.WedgeTangentX.Add(Geometry.Tangents[Geometry.Indices[i+1]].TangentX);
+            RawMesh.WedgeTangentX.Add(Geometry.Tangents[Geometry.Indices[i+2]].TangentX);
 
             RawMesh.WedgeTangentY.Add(FVector::ZeroVector);
             RawMesh.WedgeTangentY.Add(FVector::ZeroVector);
@@ -172,7 +188,7 @@ void GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geometry, FSt
         {
             UE_LOG( LogTemp, Log, TEXT("GeometryDataHelper: Created static mesh %s"), *ObjectName);
         }
-        
+        return StaticMesh;
     }
-    
+    return nullptr;
 }
