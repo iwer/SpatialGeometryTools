@@ -24,6 +24,7 @@ public:
      */
     static bool AngularSortVertices(TArray<FVector> &Vertices, bool bClockwise = true);
 
+    static bool IsFlat(const TArray<FVector> &Polygon);
     static bool IsConvex(const TArray<FVector> &Polygon);
     /**
      * Determines if vertices are in clockwise order

@@ -20,5 +20,11 @@
             "Type": "Runtime",
             "LoadingPhase": "Default"
         }
-    ]
+    ],
+	"Plugins": [
+		{
+			"Enabled": true,
+			"Name": "ProceduralMeshComponent"
+		}
+	]
 }

@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ProceduralMeshComponent.h"
+
 #include "GeometryData.generated.h"
 /**
  * 
@@ -22,7 +24,7 @@ public:
     TArray<FVector> Normals;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TArray<FVector> Tangents;
+    TArray<FProcMeshTangent> Tangents;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FVector2D> TexCoords;

@@ -39,6 +39,8 @@ public class SpatialGeometryTools : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
+                "ProceduralMeshComponent",
+				"RawMesh",
                 // ... add private dependencies that you statically link with here ...
             }
             );
