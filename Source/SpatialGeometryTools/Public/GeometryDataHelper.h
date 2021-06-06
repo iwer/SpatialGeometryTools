@@ -29,5 +29,7 @@ public:
 	/**
 	 * Creates a static mesh asset named ObjectName at Contentpath AssetPath with default material
 	 */
-	static UStaticMesh * CreateStaticMeshAsset(const FGeometryData Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material);
+	static UStaticMesh * CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material);
+
+	static bool IsValid(const FGeometryData &Geometry);
 };

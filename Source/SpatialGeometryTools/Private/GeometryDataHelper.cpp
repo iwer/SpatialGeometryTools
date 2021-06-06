@@ -100,10 +100,13 @@ void GeometryDataHelper::AppendGeometryData(FGeometryData& Root, FGeometryData& 
     }
 }
 
-UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
+UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
 {
     UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
         Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
+    if(!GeometryDataHelper::IsValid(Geometry))
+        return nullptr;
+    
     // Create Package
     FString PathPackage = FPaths::Combine(FString("/Game"), AssetPath);
     FString AbsolutePathPackage = FPaths::Combine(FPaths::ProjectContentDir(), AssetPath, FString("/"));
@@ -164,7 +167,7 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geom
         StaticMesh->GetSourceModel(0).RawMeshBulkData->SaveRawMesh(RawMesh);
 
         // Configuration
-        StaticMesh->GetSourceModel(0).BuildSettings.bRecomputeNormals = true;
+        StaticMesh->GetSourceModel(0).BuildSettings.bRecomputeNormals = false;
         StaticMesh->GetSourceModel(0).BuildSettings.bRecomputeTangents = true;
         StaticMesh->GetSourceModel(0).BuildSettings.bUseMikkTSpace = false;
         StaticMesh->GetSourceModel(0).BuildSettings.bGenerateLightmapUVs = true;
@@ -191,4 +194,22 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData Geom
         return StaticMesh;
     }
     return nullptr;
+}
+
+bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
+{
+    if(Geometry.Indices.Num() % 3 != 0)
+        return false;
+    int N = Geometry.Vertices.Num();
+
+    if(Geometry.Colors.Num() != N)
+        return false;
+    if(Geometry.Normals.Num() != N)
+        return false;
+    if(Geometry.Tangents.Num() != N)
+        return false;
+    if(Geometry.TexCoords.Num() != N)
+        return false;
+
+    return true;
 }
