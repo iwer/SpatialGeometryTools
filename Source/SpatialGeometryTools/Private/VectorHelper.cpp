@@ -1,6 +1,8 @@
 // Copyright (c) Iwer Petersen. All rights reserved.
 #include "VectorHelper.h"
 
+#include "PolygonHelper.h"
+
 VectorHelper::VectorHelper()
 {}
 
@@ -12,8 +14,20 @@ FVector VectorHelper::MakeFaceNormal(const FVector &V0, const FVector &V1, const
     if(V0.Equals(V1,.001) || V0.Equals(V2,.001) || V1.Equals(V2,.001)) {
         return FVector();
     }
-    const FVector A = V1 - V0;
-    const FVector B = V2 - V0;
+
+    FVector A, B;
+    if(PolygonHelper::IsClockwise({V0,V1,V2}))
+    {
+        A = V1 - V0;
+        B = V2 - V0;
+    } else
+    {
+        B = V1 - V0;
+        A = V2 - V0;
+    }
+    
+     
+    
     return FVector::CrossProduct(A,B).GetSafeNormal(.0001);
 }
 

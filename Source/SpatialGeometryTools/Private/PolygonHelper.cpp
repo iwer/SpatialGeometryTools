@@ -55,6 +55,42 @@ bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices, bool bClockwi
     return bIsDefinite;
 }
 
+bool PolygonHelper::IsFlat(const TArray<FVector>& Polygon)
+{
+    // discard n<3
+    if(Polygon.Num() < 3)
+        return false; // no definite plane with two points
+    // return true for n==3
+    if(Polygon.Num() == 3)
+        return true; // all vertices in plane defined by first three vertices
+    // return true when all vertices are in line
+    if(VectorHelper::IsLine(Polygon))
+        return true; // not strictly a polygon, but strictly flat
+
+    // select three vertices that ar not in line 
+    FVector P = Polygon[0];
+    FVector Q = Polygon[1];
+    int j = 2;
+    while(j < Polygon.Num() && VectorHelper::IsLine({P,Q,Polygon[j]}))
+        j++;
+    FVector R = Polygon[j];
+    
+    // build plane parameters from first three vertices (ax+b+by+cz+d=0)
+    FVector PlaneNormal = FVector::CrossProduct((Q - P),(R - P));
+    float a = PlaneNormal.X;
+    float b = PlaneNormal.Y;
+    float c = PlaneNormal.Z;
+    float d = -(a * P.X + b * P.Y + c * P.Z);
+    
+    // check if all vertices fir plane equation
+    for(auto &V : Polygon)
+    {
+        if(a * V.X + b + V.Y + c * V.Z + d != 0)
+            return false;
+    }
+    return true;
+}
+
 bool PolygonHelper::IsConvex(const TArray<FVector>& Polygon)
 {
     // no polygon with less than three vertices
@@ -92,13 +128,7 @@ bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
 TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, bool bClockwise)
 {
     TArray<FVector> Verts = Vertices;
-    
-    // if(PolygonHelper::IsClockwise(Vertices))
-    // {
-    //     Algo::Reverse(Verts);
-    // }
-  
-    
+   
     using Coord = float;
     using N = uint32_t;
     using FPoint = std::array<Coord,2>;
@@ -119,6 +149,7 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, b
 
     TArray<int32> Ret;
     for(int i = 0; i < Indices.size() - 2; i += 3) {
+        //if(!PolygonHelper::IsClockwise({Vertices[Indices[i]], Vertices[Indices[i+1]], Vertices[Indices[i+2]]}))
         if(bClockwise)
         {
             Ret.Add(Indices[i]);

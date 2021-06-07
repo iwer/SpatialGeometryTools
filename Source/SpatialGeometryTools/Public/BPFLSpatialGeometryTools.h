@@ -34,4 +34,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Face")
     static void SortVerticesByAngle(UPARAM(ref) TArray<FVector> &Vertices, const bool bClockwise);
 
+	UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Mesh")
+	static void ConcatenateGeometryData(UPARAM(ref) FGeometryData &Base, UPARAM(ref) FGeometryData &Appender);
+	
+    UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Mesh")
+	static UStaticMesh * SaveStaticMesh(UPARAM(ref)  FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material);
 };

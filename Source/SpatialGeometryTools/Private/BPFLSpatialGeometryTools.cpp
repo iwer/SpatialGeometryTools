@@ -14,23 +14,7 @@ FVector UBPFLSpatialGeometryTools::GetCenterOfMass(TArray<FVector> Vertices)
 
 FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool bClockwise)
 {
-    FGeometryData data;
-    data.Vertices = Vertices;
-
-    // if we have less than 3 vertices or all vertices are in line
-    // we cant make a face
-    if(Vertices.Num() < 3
-        || VectorHelper::IsLine(Vertices)) {
-        return data;
-    }
-
-    data.Indices = PolygonHelper::TesselatePolygon(Vertices, bClockwise);
-    data.Normals.Init(VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]), Vertices.Num());
-
-    data.TexCoords = PolygonHelper::FlatUVMapTilted(Vertices);
-    data.Colors.Init(FLinearColor(0,0,0,1), Vertices.Num());
-    data.Tangents.Init(FVector(1,0,0), Vertices.Num());
-    return data;
+    return GeometryDataHelper::MakeFace(Vertices, bClockwise);
 }
 
 FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> Vertices, const float Distance)
@@ -64,4 +48,15 @@ bool UBPFLSpatialGeometryTools::IsConvex(TArray<FVector> Polygon)
 void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, const bool bClockwise)
 {
     PolygonHelper::AngularSortVertices(Vertices,bClockwise);
+}
+
+void UBPFLSpatialGeometryTools::ConcatenateGeometryData(FGeometryData& Base, FGeometryData& Appender)
+{
+    GeometryDataHelper::AppendGeometryData(Base, Appender);
+}
+
+UStaticMesh *  UBPFLSpatialGeometryTools::SaveStaticMesh(FGeometryData& Geometry, FString ObjectName, FString AssetPath,
+                                               UMaterialInterface* Material)
+{
+    return GeometryDataHelper::CreateStaticMeshAsset(Geometry, ObjectName, AssetPath, Material);
 }
