@@ -16,6 +16,7 @@ PolygonHelper::~PolygonHelper()
 
 float PolygonHelper::PolygonArea(const TArray<FVector>& Polygon)
 {
+    // Shoelace formula
     float A = 0;
     const int32 N = Polygon.Num();
 
@@ -68,25 +69,30 @@ bool PolygonHelper::IsFlat(const TArray<FVector>& Polygon)
         return true; // not strictly a polygon, but strictly flat
 
     // select three vertices that ar not in line 
-    FVector P = Polygon[0];
-    FVector Q = Polygon[1];
+    const FVector P = Polygon[0];
+    const FVector Q = Polygon[1];
     int j = 2;
     while(j < Polygon.Num() && VectorHelper::IsLine({P,Q,Polygon[j]}))
         j++;
-    FVector R = Polygon[j];
+    const FVector R = Polygon[j];
     
     // build plane parameters from first three vertices (ax+b+by+cz+d=0)
-    FVector PlaneNormal = FVector::CrossProduct((Q - P),(R - P));
-    float a = PlaneNormal.X;
-    float b = PlaneNormal.Y;
-    float c = PlaneNormal.Z;
-    float d = -(a * P.X + b * P.Y + c * P.Z);
+    const FVector PlaneNormal = FVector::CrossProduct((Q - P),(R - P));
+    const float a = PlaneNormal.X;
+    const float b = PlaneNormal.Y;
+    const float c = PlaneNormal.Z;
+    const float d = -(a * P.X + b * P.Y + c * P.Z);
     
-    // check if all vertices fir plane equation
+    // check if all vertices fit plane equation
     for(auto &V : Polygon)
     {
-        if(a * V.X + b + V.Y + c * V.Z + d != 0)
+        float res = a * V.X + b * V.Y + c * V.Z + d;
+        if(res != 0)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("PolygonHelper::IsFlat: Vertex %s does not fit the plane equation %f*X + %f*Y + %f*Z + %f = 0 != %f"),
+                *V.ToString(), a, b, c, d, res)
             return false;
+        }
     }
     return true;
 }
@@ -98,19 +104,19 @@ bool PolygonHelper::IsConvex(const TArray<FVector>& Polygon)
         return false;
     
     // determine if z-component of crossproduct of consecutive edges all have the same sign
-    bool allPositive = false;
+    bool bSignPositive = false;
     for(int i = 0; i < Polygon.Num(); ++i)
     {
-        float dx1 = Polygon[(i+1) % Polygon.Num()].X - Polygon[i].X;
-        float dy1 = Polygon[(i+1) % Polygon.Num()].Y - Polygon[i].Y;
-        float dx2 = Polygon[(i+2) % Polygon.Num()].X - Polygon[(i+1) % Polygon.Num()].X;
-        float dy2 = Polygon[(i+2) % Polygon.Num()].Y - Polygon[(i+1) % Polygon.Num()].Y;
+        const float Dx1 = Polygon[(i+1) % Polygon.Num()].X - Polygon[i].X;
+        const float Dy1 = Polygon[(i+1) % Polygon.Num()].Y - Polygon[i].Y;
+        const float Dx2 = Polygon[(i+2) % Polygon.Num()].X - Polygon[(i+1) % Polygon.Num()].X;
+        const float Dy2 = Polygon[(i+2) % Polygon.Num()].Y - Polygon[(i+1) % Polygon.Num()].Y;
 
-        float zcross = dx1 * dy2 - dy1 * dx2;
+        const float Zcross = Dx1 * Dy2 - Dy1 * Dx2;
 
         if(i==0)
-            allPositive = zcross > 0;
-        else if ((zcross > 0) != allPositive)
+            bSignPositive = Zcross > 0;
+        else if ((Zcross > 0) != bSignPositive)
         {
             // at least one corner is not convex
             return false;
@@ -125,6 +131,12 @@ bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
     return PolygonHelper::PolygonArea(Polygon) < 0;
 }
 
+
+/*
+ * TODO: This needs to be more robust because it crashes when the polygon stands vertical because the z-projection forms a
+ * line without triangles. When polygon is flat this is as easy as rotating the vertices around COM so that the face
+ * normal is (0,0,1).
+ */
 TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, bool bClockwise)
 {
     TArray<FVector> Verts = Vertices;
