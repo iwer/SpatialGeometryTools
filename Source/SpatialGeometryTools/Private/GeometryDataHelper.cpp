@@ -198,10 +198,11 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geo
 
 bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
 {
+    // indices must be multiple of 3
     if(Geometry.Indices.Num() % 3 != 0)
         return false;
+    // Same N for vertices, Colors, Normals, Tangents and TexCoords
     int N = Geometry.Vertices.Num();
-
     if(Geometry.Colors.Num() != N)
         return false;
     if(Geometry.Normals.Num() != N)
@@ -211,5 +212,13 @@ bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
     if(Geometry.TexCoords.Num() != N)
         return false;
 
+    // each index must be in range of N
+    for(auto idx : Geometry.Indices)
+    {
+        if(idx >= N)
+            return false;
+    }
+
+    // this is fine
     return true;
 }
