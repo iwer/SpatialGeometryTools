@@ -79,8 +79,10 @@ void UBPFLSpatialGeometryTools::ConcatenateGeometryData(FGeometryData& Base, FGe
     GeometryDataHelper::AppendGeometryData(Base, Appender);
 }
 
+/*
 UStaticMesh *  UBPFLSpatialGeometryTools::SaveStaticMesh(FGeometryData& Geometry, FString ObjectName, FString AssetPath,
                                                UMaterialInterface* Material)
 {
     return GeometryDataHelper::CreateStaticMeshAsset(Geometry, ObjectName, AssetPath, Material);
 }
+*/

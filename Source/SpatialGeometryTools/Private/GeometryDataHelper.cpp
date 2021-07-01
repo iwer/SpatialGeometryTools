@@ -110,6 +110,7 @@ void GeometryDataHelper::AppendGeometryData(FGeometryData& Root, FGeometryData& 
     }
 }
 
+/*
 UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
 {
     UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
@@ -205,6 +206,7 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geo
     }
     return nullptr;
 }
+*/
 
 bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
 {
