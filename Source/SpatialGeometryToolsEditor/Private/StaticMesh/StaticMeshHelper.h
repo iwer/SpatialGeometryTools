@@ -92,13 +92,13 @@ public:
             StaticMesh->GetSourceModel(0).BuildSettings.bRecomputeTangents = true;
             StaticMesh->GetSourceModel(0).BuildSettings.bUseMikkTSpace = false;
             StaticMesh->GetSourceModel(0).BuildSettings.bGenerateLightmapUVs = true;
-            StaticMesh->GetSourceModel(0).BuildSettings.bBuildAdjacencyBuffer = false;
+            //StaticMesh->GetSourceModel(0).BuildSettings.bBuildAdjacencyBuffer = false;
             StaticMesh->GetSourceModel(0).BuildSettings.bBuildReversedIndexBuffer = false;
             StaticMesh->GetSourceModel(0).BuildSettings.bUseFullPrecisionUVs = false;
             StaticMesh->GetSourceModel(0).BuildSettings.bUseHighPrecisionTangentBasis = false;
 
             // Assign Material
-            StaticMesh->StaticMaterials.Add(Material);
+            StaticMesh->GetStaticMaterials().Add(Material);
             StaticMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;
             StaticMesh->CreateBodySetup();
             StaticMesh->SetLightingGuid();
