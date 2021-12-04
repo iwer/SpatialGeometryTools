@@ -28,10 +28,20 @@ FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, bool bClock
         return data;
     }
 
-    data.Indices = PolygonHelper::TesselatePolygon(Vertices, bClockwise);
-    data.Normals.Init(VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]), Vertices.Num());
+    const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
 
-    data.TexCoords = PolygonHelper::FlatUVMapTilted(Vertices);
+    // rotate vertices into x-y plane using normal
+    FRotator Rotator = FRotationMatrix::MakeFromZ(Normal).Rotator();
+    TArray<FVector> RotVerts;
+    for(auto &V : data.Vertices)
+    {
+        RotVerts.Add(Rotator.UnrotateVector(V));
+    }
+    
+    data.Indices = PolygonHelper::TesselatePolygon(RotVerts, bClockwise);
+    data.Normals.Init(Normal, Vertices.Num());
+
+    data.TexCoords = PolygonHelper::FlatUVMapTilted(RotVerts);
     data.Colors.Init(FLinearColor(0,0,0,1), Vertices.Num());
     data.Tangents.Init(FProcMeshTangent(1,0,0), Vertices.Num());
     return data;
@@ -100,6 +110,7 @@ void GeometryDataHelper::AppendGeometryData(FGeometryData& Root, FGeometryData& 
     }
 }
 
+/*
 UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
 {
     UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
@@ -195,6 +206,7 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geo
     }
     return nullptr;
 }
+*/
 
 bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
 {
