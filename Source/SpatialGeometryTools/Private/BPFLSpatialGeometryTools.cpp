@@ -81,28 +81,7 @@ void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, c
 
 bool UBPFLSpatialGeometryTools::IsValid(FGeometryData &GeometryData)
 {
-    const int VertNum = GeometryData.Vertices.Num();
-    if(GeometryData.Normals.Num() != VertNum){
-        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of normals: %d (should be %d)"), GeometryData.Normals.Num(), VertNum)
-        return false;
-    }
-    if(GeometryData.Tangents.Num() != VertNum){
-        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of tangents: %d (should be %d)"), GeometryData.Tangents.Num(), VertNum)
-        return false;
-    }
-    if(GeometryData.TexCoords.Num() != VertNum){
-        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of texcoords: %d (should be %d)"), GeometryData.TexCoords.Num(), VertNum)
-        return false;
-    }
-    if(GeometryData.Colors.Num() != VertNum){
-        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of colors: %d (should be %d)"), GeometryData.Colors.Num(), VertNum)
-        return false;
-    }
-    if(GeometryData.Indices.Num() % 3 != 0) {
-        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of colors: %d (should be divisable by 3)"), GeometryData.Indices.Num())
-        return false;
-    }
-    return true;
+    return GeometryDataHelper::IsValid(GeometryData);
 }
 
 void UBPFLSpatialGeometryTools::ConcatenateGeometryData(FGeometryData& Base, FGeometryData& Appender)

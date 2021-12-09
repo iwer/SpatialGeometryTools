@@ -253,20 +253,30 @@ bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
         return false;
     // Same N for vertices, Colors, Normals, Tangents and TexCoords
     int N = Geometry.Vertices.Num();
-    if(Geometry.Colors.Num() != N)
+    if(Geometry.Colors.Num() != N){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of colors: %d (should be %d)"), Geometry.Colors.Num(), N)
         return false;
-    if(Geometry.Normals.Num() != N)
+    }
+    if(Geometry.Normals.Num() != N){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of normals: %d (should be %d)"), Geometry.Normals.Num(), N)
         return false;
-    if(Geometry.Tangents.Num() != N)
+    }
+    if(Geometry.Tangents.Num() != N){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of tangents: %d (should be %d)"), Geometry.Tangents.Num(), N)
         return false;
-    if(Geometry.TexCoords.Num() != N)
+    }
+    if(Geometry.TexCoords.Num() != N){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of texcoords: %d (should be %d)"), Geometry.TexCoords.Num(), N)
         return false;
+    }
 
     // each index must be in range of N
     for(auto idx : Geometry.Indices)
     {
-        if(idx >= N)
+        if(idx >= N){
+            UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid index: %d (should inside [0;%d])"), idx, N)
             return false;
+        }
     }
 
     // this is fine
