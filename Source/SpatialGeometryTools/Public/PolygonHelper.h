@@ -35,7 +35,7 @@ public:
      * Generates triangle indices for a set of vertices. Assumes vertices are in X-Y plane.
      * TODO: This may also work in 3D,  check earcut docs.
      */
-    static TArray<int32> TesselatePolygon(const TArray<FVector> &Vertices, bool bClockwise);
+    static TArray<int32> TesselatePolygon(const TArray<FVector> &Vertices, const TArray<FVector> &HoleVertices, bool bClockwise);
 
     /**
      * Assumes a polygon in X-Y plane and projects a UV map from Z direction

@@ -14,7 +14,7 @@ FVector UBPFLSpatialGeometryTools::GetCenterOfMass(TArray<FVector> Vertices)
 
 FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
 {
-    // select three vertices that ar not in line 
+    // select three vertices that ar not in line
     const FVector P = Vertices[0];
     const FVector Q = Vertices[1];
     int j = 2;
@@ -26,7 +26,7 @@ FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
         UE_LOG(LogTemp, Warning, TEXT("UBPFLSpatialGeometryTools: Need three different vertices for normal calculation"))
         return FVector::ZeroVector;
     }
-    
+
     const FVector R = Vertices[j];
     return VectorHelper::MakeFaceNormal(P,Q,R);
 }
@@ -34,6 +34,11 @@ FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
 FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool bClockwise)
 {
     return GeometryDataHelper::MakeFace(Vertices, bClockwise);
+}
+
+FGeometryData UBPFLSpatialGeometryTools::MakeFaceWithHole(TArray<FVector> Vertices, TArray<FVector> HoleVertices, bool bClockwise)
+{
+    return GeometryDataHelper::MakeFace(Vertices, HoleVertices, bClockwise);
 }
 
 FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> Vertices, const float Distance)
@@ -50,7 +55,7 @@ FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> 
         auto P1a = OffsetVertices[(i + 1) % Vertices.Num()];
         GeometryDataHelper::AppendQuad(data, P0, P1, P0a, P1a);
     }
-    
+
     return data;
 }
 
@@ -72,6 +77,32 @@ bool UBPFLSpatialGeometryTools::IsFlat(TArray<FVector> Polygon)
 void UBPFLSpatialGeometryTools::SortVerticesByAngle(TArray<FVector>& Vertices, const bool bClockwise)
 {
     PolygonHelper::AngularSortVertices(Vertices,bClockwise);
+}
+
+bool UBPFLSpatialGeometryTools::IsValid(FGeometryData &GeometryData)
+{
+    const int VertNum = GeometryData.Vertices.Num();
+    if(GeometryData.Normals.Num() != VertNum){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of normals: %d (should be %d)"), GeometryData.Normals.Num(), VertNum)
+        return false;
+    }
+    if(GeometryData.Tangents.Num() != VertNum){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of tangents: %d (should be %d)"), GeometryData.Tangents.Num(), VertNum)
+        return false;
+    }
+    if(GeometryData.TexCoords.Num() != VertNum){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of texcoords: %d (should be %d)"), GeometryData.TexCoords.Num(), VertNum)
+        return false;
+    }
+    if(GeometryData.Colors.Num() != VertNum){
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of colors: %d (should be %d)"), GeometryData.Colors.Num(), VertNum)
+        return false;
+    }
+    if(GeometryData.Indices.Num() % 3 != 0) {
+        UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of colors: %d (should be divisable by 3)"), GeometryData.Indices.Num())
+        return false;
+    }
+    return true;
 }
 
 void UBPFLSpatialGeometryTools::ConcatenateGeometryData(FGeometryData& Base, FGeometryData& Appender)

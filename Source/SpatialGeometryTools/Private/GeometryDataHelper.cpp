@@ -37,13 +37,51 @@ FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, bool bClock
     {
         RotVerts.Add(Rotator.UnrotateVector(V));
     }
-    
-    data.Indices = PolygonHelper::TesselatePolygon(RotVerts, bClockwise);
+
+    data.Indices = PolygonHelper::TesselatePolygon(RotVerts, TArray<FVector>(), bClockwise);
     data.Normals.Init(Normal, Vertices.Num());
 
     data.TexCoords = PolygonHelper::FlatUVMapTilted(RotVerts);
     data.Colors.Init(FLinearColor(0,0,0,1), Vertices.Num());
     data.Tangents.Init(FProcMeshTangent(1,0,0), Vertices.Num());
+    return data;
+}
+
+FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, TArray<FVector> HoleVertices, bool bClockwise)
+{
+    FGeometryData data;
+    data.Vertices = Vertices;
+    data.Vertices.Append(HoleVertices);
+    // if we have less than 3 vertices or all vertices are in line
+    // we cant make a face
+    if(Vertices.Num() < 3
+        || VectorHelper::IsLine(Vertices)) {
+        return data;
+    }
+
+    const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
+
+    // rotate vertices into x-y plane using normal
+    FRotator Rotator = FRotationMatrix::MakeFromZ(Normal).Rotator();
+    TArray<FVector> RotVerts;
+    TArray<FVector> RotHoleVerts;
+    for(auto &V : Vertices)
+    {
+        RotVerts.Add(Rotator.UnrotateVector(V));
+    }
+    for(auto &V : HoleVertices)
+    {
+        RotHoleVerts.Add(Rotator.UnrotateVector(V));
+    }
+
+
+    data.Indices = PolygonHelper::TesselatePolygon(RotVerts, RotHoleVerts, bClockwise);
+    data.Normals.Init(Normal, Vertices.Num() + HoleVertices.Num());
+
+    data.TexCoords = PolygonHelper::FlatUVMapTilted(RotVerts);
+    data.TexCoords.Append(PolygonHelper::FlatUVMapTilted(RotHoleVerts));
+    data.Colors.Init(FLinearColor(0,0,0,1), Vertices.Num() + HoleVertices.Num());
+    data.Tangents.Init(FProcMeshTangent(1,0,0), Vertices.Num() + HoleVertices.Num());
     return data;
 }
 
@@ -65,7 +103,7 @@ void GeometryDataHelper::AppendQuad(FGeometryData &data, const FVector &P0, cons
     FVector FaceNormal = VectorHelper::MakeFaceNormal(P0, P0a, P1);
     FVector VTangent = (P1 - P0).GetSafeNormal(.0001);
     FVector Cotangent = FVector::CrossProduct(VTangent, FaceNormal);
-    
+
     TArray<FVector> Normals;
     TArray<FLinearColor> Colors;
     TArray<FProcMeshTangent> Tangents;
@@ -117,7 +155,7 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geo
         Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
     if(!GeometryDataHelper::IsValid(Geometry))
         return nullptr;
-    
+
     // Create Package
     FString PathPackage = FPaths::Combine(FString("/Game"), AssetPath);
     FString AbsolutePathPackage = FPaths::Combine(FPaths::ProjectContentDir(), AssetPath, FString("/"));
@@ -193,7 +231,7 @@ UStaticMesh * GeometryDataHelper::CreateStaticMeshAsset(const FGeometryData &Geo
         StaticMesh->CreateBodySetup();
         StaticMesh->SetLightingGuid();
         FAssetRegistryModule::AssetCreated(StaticMesh);
-        
+
         StaticMesh->PostEditChange();
         if(!MeshPackage->MarkPackageDirty())
         {
