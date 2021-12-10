@@ -7,7 +7,7 @@
 #include "PolygonHelper.h"
 #include "GeometryDataHelper.h"
 
-FVector UBPFLSpatialGeometryTools::GetCenterOfMass(TArray<FVector> Vertices)
+FVector UBPFLSpatialGeometryTools::GetCenterOfMass(const TArray<FVector> Vertices)
 {
     return VectorHelper::CenterOfMass(Vertices);
 }
@@ -31,12 +31,12 @@ FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
     return VectorHelper::MakeFaceNormal(P,Q,R);
 }
 
-FGeometryData UBPFLSpatialGeometryTools::MakeFace(TArray<FVector> Vertices, bool bClockwise)
+FGeometryData UBPFLSpatialGeometryTools::MakeFace(const TArray<FVector> Vertices, const bool bClockwise)
 {
     return GeometryDataHelper::MakeFace(Vertices, bClockwise);
 }
 
-FGeometryData UBPFLSpatialGeometryTools::MakeFaceWithHole(TArray<FVector> Vertices, TArray<FVector> HoleVertices, bool bClockwise)
+FGeometryData UBPFLSpatialGeometryTools::MakeFaceWithHole(const TArray<FVector> Vertices, const TArray<FVector> HoleVertices, const bool bClockwise)
 {
     return GeometryDataHelper::MakeFace(Vertices, HoleVertices, bClockwise);
 }
@@ -51,25 +51,25 @@ FGeometryData UBPFLSpatialGeometryTools::ExtrudeFaceAlongNormal(TArray<FVector> 
     for(int32 i = 0; i < Vertices.Num(); ++i) {
         auto P0 = Vertices[i];
         auto P1 = Vertices[(i + 1) % Vertices.Num()];
-        auto P0a = OffsetVertices[i];
-        auto P1a = OffsetVertices[(i + 1) % Vertices.Num()];
-        GeometryDataHelper::AppendQuad(data, P0, P1, P0a, P1a);
+        auto P0A = OffsetVertices[i];
+        auto P1A = OffsetVertices[(i + 1) % Vertices.Num()];
+        GeometryDataHelper::AppendQuad(data, P0, P1, P0A, P1A);
     }
 
     return data;
 }
 
-bool UBPFLSpatialGeometryTools::IsClockwise(TArray<FVector> Polygon)
+bool UBPFLSpatialGeometryTools::IsClockwise(const TArray<FVector> Polygon)
 {
     return PolygonHelper::IsClockwise(Polygon);
 }
 
-bool UBPFLSpatialGeometryTools::IsConvex(TArray<FVector> Polygon)
+bool UBPFLSpatialGeometryTools::IsConvex(const TArray<FVector> Polygon)
 {
     return PolygonHelper::IsConvex(Polygon);
 }
 
-bool UBPFLSpatialGeometryTools::IsFlat(TArray<FVector> Polygon)
+bool UBPFLSpatialGeometryTools::IsFlat(const TArray<FVector> Polygon)
 {
     return PolygonHelper::IsFlat(Polygon);
 }
@@ -89,10 +89,3 @@ void UBPFLSpatialGeometryTools::ConcatenateGeometryData(FGeometryData& Base, FGe
     GeometryDataHelper::AppendGeometryData(Base, Appender);
 }
 
-/*
-UStaticMesh *  UBPFLSpatialGeometryTools::SaveStaticMesh(FGeometryData& Geometry, FString ObjectName, FString AssetPath,
-                                               UMaterialInterface* Material)
-{
-    return GeometryDataHelper::CreateStaticMeshAsset(Geometry, ObjectName, AssetPath, Material);
-}
-*/

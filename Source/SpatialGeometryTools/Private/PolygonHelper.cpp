@@ -86,11 +86,11 @@ bool PolygonHelper::IsFlat(const TArray<FVector>& Polygon)
     // check if all vertices fit plane equation
     for(auto &V : Polygon)
     {
-        float res = a * V.X + b * V.Y + c * V.Z + d;
-        if(res != 0)
+        const float Res = a * V.X + b * V.Y + c * V.Z + d;
+        if(Res != 0)
         {
             UE_LOG(LogTemp, Warning, TEXT("PolygonHelper::IsFlat: Vertex %s does not fit the plane equation %f*X + %f*Y + %f*Z + %f = 0 != %f"),
-                *V.ToString(), a, b, c, d, res)
+                *V.ToString(), a, b, c, d, Res)
             return false;
         }
     }
@@ -137,7 +137,7 @@ bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
  * line without triangles. When polygon is flat this is as easy as rotating the vertices around COM so that the face
  * normal is (0,0,1).
  */
-TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, const TArray<FVector> &HoleVertices, bool bClockwise)
+TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, const TArray<FVector> &HoleVertices, const bool bClockwise)
 {
     TArray<FVector> Verts = Vertices;
 
@@ -149,7 +149,7 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, c
     const std::vector<FPoint> Shape;
     Polygon.push_back(Shape);
 
-    for(auto &Vertex : Verts) {
+    for(const auto &Vertex : Verts) {
         FPoint p;
         p[0] = Vertex.X;
         p[1] = Vertex.Y;
@@ -168,7 +168,7 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, c
     }
 
     // tesselate using earcut
-    std::vector<N> Indices = mapbox::earcut<N>(Polygon);
+    const std::vector<N> Indices = mapbox::earcut<N>(Polygon);
 
     TArray<int32> Ret;
     for(int i = 0; i < Indices.size() - 2; i += 3) {
@@ -210,8 +210,8 @@ TArray<FVector2D> PolygonHelper::FlatUVMapTilted(const TArray<FVector> &Vertices
 
     // get normal of polygon
     const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
-    FVector Forward = (Vertices[1] - Vertices[0]).GetSafeNormal(.0001);
-    FVector Right = FVector::CrossProduct(Normal, Forward);
+    const FVector Forward = (Vertices[1] - Vertices[0]).GetSafeNormal(.0001);
+    const FVector Right = FVector::CrossProduct(Normal, Forward);
 
     FVector UP;
     if(PolygonHelper::IsClockwise(Vertices)) {

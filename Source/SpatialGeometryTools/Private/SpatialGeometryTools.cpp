@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright (c) Iwer Petersen. All rights reserved.
 
 #include "SpatialGeometryTools.h"
 

@@ -83,11 +83,6 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Mesh")
     static void ConcatenateGeometryData(UPARAM(ref) FGeometryData &Base, UPARAM(ref) FGeometryData &Appender);
-
-    /**
-     * Creates a StaticMesh Asset from Geometry named ObjectName, placed at AssetPath in /Game with a default Material.
-     */
-    //UFUNCTION(BlueprintCallable, Category="SpatialGeometryTools|Mesh")
-    //static UStaticMesh * SaveStaticMesh(UPARAM(ref)  FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material);
+ 
 
 };
