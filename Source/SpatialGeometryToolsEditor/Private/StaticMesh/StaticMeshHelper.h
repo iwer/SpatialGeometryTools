@@ -15,19 +15,19 @@
 class SPATIALGEOMETRYTOOLSEDITOR_API StaticMeshHelper
 {
 public:
-	StaticMeshHelper();
-	~StaticMeshHelper();
+    StaticMeshHelper();
+    ~StaticMeshHelper();
 
-	/**
-	* Creates a static mesh asset named ObjectName at Contentpath AssetPath with default material
-	*/
-	static UStaticMesh * CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
+    /**
+    * Creates a static mesh asset named ObjectName at Contentpath AssetPath with default material
+    */
+    static UStaticMesh * CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
         Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
         if(!GeometryDataHelper::IsValid(Geometry))
             return nullptr;
-        
+
         // Create Package
         FString PathPackage = FPaths::Combine(FString("/Game"), AssetPath);
         FString AbsolutePathPackage = FPaths::Combine(FPaths::ProjectContentDir(), AssetPath, FString("/"));
@@ -101,9 +101,12 @@ public:
             StaticMesh->GetStaticMaterials().Add(Material);
             StaticMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;
             StaticMesh->CreateBodySetup();
+            StaticMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
             StaticMesh->SetLightingGuid();
-            FAssetRegistryModule::AssetCreated(StaticMesh);
             
+            StaticMesh->Build();
+            FAssetRegistryModule::AssetCreated(StaticMesh);
+
             StaticMesh->PostEditChange();
             if(!MeshPackage->MarkPackageDirty())
             {
@@ -115,5 +118,5 @@ public:
             return StaticMesh;
         }
         return nullptr;
-	}
+    }
 };
