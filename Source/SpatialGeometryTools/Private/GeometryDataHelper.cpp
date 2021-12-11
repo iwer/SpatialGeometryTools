@@ -100,7 +100,7 @@ void GeometryDataHelper::AppendQuad(FGeometryData &Data, const FVector &P0, cons
     // triangle p1a, p0a, p1
     Data.Indices.Append({StartIdx + 3, StartIdx + 2, StartIdx});
 
-    const FVector FaceNormal = VectorHelper::MakeFaceNormal(P0, P0A, P1);
+    const FVector FaceNormal = VectorHelper::MakeFaceNormal(P0, P1, P0A);
     const FVector VTangent = (P1 - P0).GetSafeNormal(.0001);
     const FVector Cotangent = FVector::CrossProduct(VTangent, FaceNormal);
 

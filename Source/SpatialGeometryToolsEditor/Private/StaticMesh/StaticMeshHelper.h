@@ -23,8 +23,8 @@ public:
     */
     static UStaticMesh * CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
     {
-        UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
-        Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
+        //UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
+        //Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
         if(!GeometryDataHelper::IsValid(Geometry))
             return nullptr;
 
@@ -103,7 +103,7 @@ public:
             StaticMesh->CreateBodySetup();
             StaticMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
             StaticMesh->SetLightingGuid();
-            
+
             StaticMesh->Build();
             FAssetRegistryModule::AssetCreated(StaticMesh);
 
@@ -113,7 +113,7 @@ public:
                 UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper: Editor suppressed marking package  %s dirty!"), *Package->GetName())
             } else
             {
-                UE_LOG( LogTemp, Log, TEXT("GeometryDataHelper: Created static mesh %s"), *ObjectName);
+                //UE_LOG( LogTemp, Log, TEXT("GeometryDataHelper: Created static mesh %s"), *ObjectName);
             }
             return StaticMesh;
         }
