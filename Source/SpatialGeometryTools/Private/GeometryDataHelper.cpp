@@ -3,9 +3,7 @@
 
 #include "GeometryDataHelper.h"
 #include "PolygonHelper.h"
-#include "RawMesh.h"
 #include "VectorHelper.h"
-#include "AssetRegistry/AssetRegistryModule.h"
 
 
 GeometryDataHelper::GeometryDataHelper()
@@ -24,11 +22,11 @@ FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, const bool 
     // if we have less than 3 vertices or all vertices are in line
     // we cant make a face
     if(Vertices.Num() < 3
-        || VectorHelper::IsLine(Vertices)) {
+        || FVectorHelper::IsLine(Vertices)) {
         return data;
     }
 
-    const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
+    const FVector Normal = FVectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
 
     // rotate vertices into x-y plane using normal
     const FRotator Rotator = FRotationMatrix::MakeFromZ(Normal).Rotator();
@@ -38,7 +36,7 @@ FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, const bool 
         RotVerts.Add(Rotator.UnrotateVector(V));
     }
 
-    data.Indices = PolygonHelper::TesselatePolygon(RotVerts, TArray<FVector>(), bClockwise);
+    data.Indices = PolygonHelper::TessellatePolygon(RotVerts, TArray<FVector>(), bClockwise);
     data.Normals.Init(Normal, Vertices.Num());
 
     data.TexCoords = PolygonHelper::FlatUVMapTilted(RotVerts);
@@ -55,11 +53,11 @@ FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, TArray<FVec
     // if we have less than 3 vertices or all vertices are in line
     // we cant make a face
     if(Vertices.Num() < 3
-        || VectorHelper::IsLine(Vertices)) {
+        || FVectorHelper::IsLine(Vertices)) {
         return Data;
     }
 
-    const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
+    const FVector Normal = FVectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
 
     // rotate vertices into x-y plane using normal
     const FRotator Rotator = FRotationMatrix::MakeFromZ(Normal).Rotator();
@@ -75,7 +73,7 @@ FGeometryData GeometryDataHelper::MakeFace(TArray<FVector> Vertices, TArray<FVec
     }
 
 
-    Data.Indices = PolygonHelper::TesselatePolygon(RotVerts, RotHoleVerts, bClockwise);
+    Data.Indices = PolygonHelper::TessellatePolygon(RotVerts, RotHoleVerts, bClockwise);
     Data.Normals.Init(Normal, Vertices.Num() + HoleVertices.Num());
 
     Data.TexCoords = PolygonHelper::FlatUVMapTilted(RotVerts);
@@ -100,7 +98,7 @@ void GeometryDataHelper::AppendQuad(FGeometryData &Data, const FVector &P0, cons
     // triangle p1a, p0a, p1
     Data.Indices.Append({StartIdx + 3, StartIdx + 2, StartIdx});
 
-    const FVector FaceNormal = VectorHelper::MakeFaceNormal(P0, P1, P0A);
+    const FVector FaceNormal = FVectorHelper::MakeFaceNormal(P0, P1, P0A);
     const FVector VTangent = (P1 - P0).GetSafeNormal(.0001);
     const FVector Cotangent = FVector::CrossProduct(VTangent, FaceNormal);
 
@@ -118,8 +116,6 @@ void GeometryDataHelper::AppendQuad(FGeometryData &Data, const FVector &P0, cons
     Colors.Init(FLinearColor(0, 0, 0, 1), 4);
     Data.Colors.Append(Colors);
 
-    FVector UP(0,0,-1);
-    //auto Rotator = UP.Rotation() - FaceNormal.Rotation();
     const auto Rotator = FMatrix(Cotangent, VTangent, FaceNormal, FVector::ZeroVector).Rotator();
     const FVector UV0 = Rotator.UnrotateVector(P0) / 100;
     const FVector UV1 = Rotator.UnrotateVector(P1) / 100;
@@ -154,7 +150,7 @@ bool GeometryDataHelper::IsValid(const FGeometryData& Geometry)
     if(Geometry.Indices.Num() % 3 != 0)
         return false;
     // Same N for vertices, Colors, Normals, Tangents and TexCoords
-    int N = Geometry.Vertices.Num();
+    const int N = Geometry.Vertices.Num();
     if(Geometry.Colors.Num() != N){
         UE_LOG(LogTemp,Warning,TEXT("FGeometryData has invalid number of colors: %d (should be %d)"), Geometry.Colors.Num(), N)
         return false;

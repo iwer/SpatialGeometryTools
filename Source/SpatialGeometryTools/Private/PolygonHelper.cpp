@@ -32,7 +32,7 @@ float PolygonHelper::PolygonArea(const TArray<FVector>& Polygon)
 
 bool PolygonHelper::AngularSortVertices(TArray<FVector>& Vertices, bool bClockwise)
 {
-    FVector Com = VectorHelper::CenterOfMass(Vertices);
+    FVector Com = FVectorHelper::CenterOfMass(Vertices);
     UE_LOG(LogTemp, Warning, TEXT("PolygonHelper: Com %s"), *Com.ToString())
     bool bIsDefinite = true;
     Vertices.Sort([Com, &bIsDefinite, bClockwise](const FVector& V0, const FVector &V1)
@@ -65,14 +65,14 @@ bool PolygonHelper::IsFlat(const TArray<FVector>& Polygon)
     if(Polygon.Num() == 3)
         return true; // all vertices in plane defined by first three vertices
     // return true when all vertices are in line
-    if(VectorHelper::IsLine(Polygon))
+    if(FVectorHelper::IsLine(Polygon))
         return true; // not strictly a polygon, but strictly flat
 
     // select three vertices that ar not in line
     const FVector P = Polygon[0];
     const FVector Q = Polygon[1];
     int j = 2;
-    while(j < Polygon.Num() && VectorHelper::IsLine({P,Q,Polygon[j]}))
+    while(j < Polygon.Num() && FVectorHelper::IsLine({P,Q,Polygon[j]}))
         j++;
     const FVector R = Polygon[j];
 
@@ -103,7 +103,7 @@ bool PolygonHelper::IsConvex(const TArray<FVector>& Polygon)
     if(Polygon.Num() < 3)
         return false;
 
-    // determine if z-component of crossproduct of consecutive edges all have the same sign
+    // determine if z-component of cross product of consecutive edges all have the same sign
     bool bSignPositive = false;
     for(int i = 0; i < Polygon.Num(); ++i)
     {
@@ -112,11 +112,11 @@ bool PolygonHelper::IsConvex(const TArray<FVector>& Polygon)
         const float Dx2 = Polygon[(i+2) % Polygon.Num()].X - Polygon[(i+1) % Polygon.Num()].X;
         const float Dy2 = Polygon[(i+2) % Polygon.Num()].Y - Polygon[(i+1) % Polygon.Num()].Y;
 
-        const float Zcross = Dx1 * Dy2 - Dy1 * Dx2;
+        const float ZCross = Dx1 * Dy2 - Dy1 * Dx2;
 
         if(i==0)
-            bSignPositive = Zcross > 0;
-        else if ((Zcross > 0) != bSignPositive)
+            bSignPositive = ZCross > 0;
+        else if ((ZCross > 0) != bSignPositive)
         {
             // at least one corner is not convex
             return false;
@@ -137,7 +137,7 @@ bool PolygonHelper::IsClockwise(const TArray<FVector>& Polygon)
  * line without triangles. When polygon is flat this is as easy as rotating the vertices around COM so that the face
  * normal is (0,0,1).
  */
-TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, const TArray<FVector> &HoleVertices, const bool bClockwise)
+TArray<int32> PolygonHelper::TessellatePolygon(const TArray<FVector> &Vertices, const TArray<FVector> &HoleVertices, const bool bClockwise)
 {
     TArray<FVector> Verts = Vertices;
 
@@ -167,7 +167,7 @@ TArray<int32> PolygonHelper::TesselatePolygon(const TArray<FVector> &Vertices, c
         }
     }
 
-    // tesselate using earcut
+    // tessellate using earcut
     const std::vector<N> Indices = mapbox::earcut<N>(Polygon);
 
     TArray<int32> Ret;
@@ -209,16 +209,10 @@ TArray<FVector2D> PolygonHelper::FlatUVMapTilted(const TArray<FVector> &Vertices
     }
 
     // get normal of polygon
-    const FVector Normal = VectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
+    const FVector Normal = FVectorHelper::MakeFaceNormal(Vertices[0], Vertices[1], Vertices[2]);
     const FVector Forward = (Vertices[1] - Vertices[0]).GetSafeNormal(.0001);
     const FVector Right = FVector::CrossProduct(Normal, Forward);
 
-    FVector UP;
-    if(PolygonHelper::IsClockwise(Vertices)) {
-        UP = FVector(0,0,-1);
-    } else {
-        UP = FVector(0,0,1);
-    }
     // calculate deviation from x-y plane as rotator;
     const auto Rotator = FMatrix(Right, Forward, Normal, FVector::ZeroVector).Rotator();
 

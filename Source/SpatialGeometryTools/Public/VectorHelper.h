@@ -7,11 +7,11 @@
 /**
  *
  */
-class SPATIALGEOMETRYTOOLS_API VectorHelper
+class SPATIALGEOMETRYTOOLS_API FVectorHelper
 {
 public:
-    VectorHelper();
-    ~VectorHelper();
+    FVectorHelper();
+    ~FVectorHelper();
 
     static FVector MakeFaceNormal(const FVector &V0, const FVector &V1, const FVector &V2);
 	static FVector CenterOfMass(const TArray<FVector> &Vertices);

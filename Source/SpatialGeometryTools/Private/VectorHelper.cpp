@@ -3,13 +3,13 @@
 
 #include "PolygonHelper.h"
 
-VectorHelper::VectorHelper()
+FVectorHelper::FVectorHelper()
 {}
 
-VectorHelper::~VectorHelper()
+FVectorHelper::~FVectorHelper()
 {}
 
-FVector VectorHelper::MakeFaceNormal(const FVector &V0, const FVector &V1, const FVector &V2)
+FVector FVectorHelper::MakeFaceNormal(const FVector &V0, const FVector &V1, const FVector &V2)
 {
     if(V0.Equals(V1,.001) || V0.Equals(V2,.001) || V1.Equals(V2,.001)) {
         return FVector();
@@ -31,7 +31,7 @@ FVector VectorHelper::MakeFaceNormal(const FVector &V0, const FVector &V1, const
     return FVector::CrossProduct(A,B).GetSafeNormal(.0001);
 }
 
-FVector VectorHelper::CenterOfMass(const TArray<FVector>& Vertices)
+FVector FVectorHelper::CenterOfMass(const TArray<FVector>& Vertices)
 {
     FVector Ret = FVector::ZeroVector;
     for(auto &v : Vertices)
@@ -42,7 +42,7 @@ FVector VectorHelper::CenterOfMass(const TArray<FVector>& Vertices)
     return Ret;
 }
 
-bool VectorHelper::IsLine(TArray<FVector> Vertices)
+bool FVectorHelper::IsLine(TArray<FVector> Vertices)
 {
     if(Vertices.Num() < 3)
         return true;

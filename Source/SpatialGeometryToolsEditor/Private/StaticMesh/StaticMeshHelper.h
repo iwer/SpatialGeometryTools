@@ -19,11 +19,11 @@ public:
     ~StaticMeshHelper();
 
     /**
-    * Creates a static mesh asset named ObjectName at Contentpath AssetPath with default material
+    * Creates a static mesh asset named ObjectName at Content path AssetPath with default material
     */
     static UStaticMesh * CreateStaticMeshAsset(const FGeometryData &Geometry, FString ObjectName, FString AssetPath, UMaterialInterface * Material)
     {
-        //UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d texcoords"),
+        //UE_LOG(LogTemp, Warning, TEXT("GeometryDataHelper::CreateStaticMeshAsset: %d vertices, %d indices, %d normals, %d colors, %d tangents, %d tex coords"),
         //Geometry.Vertices.Num(), Geometry.Indices.Num(), Geometry.Normals.Num(), Geometry.Colors.Num(), Geometry.Tangents.Num(), Geometry.TexCoords.Num())
         if(!GeometryDataHelper::IsValid(Geometry))
             return nullptr;
@@ -33,7 +33,7 @@ public:
         FString AbsolutePathPackage = FPaths::Combine(FPaths::ProjectContentDir(), AssetPath, FString("/"));
 
         UPackage * Package = CreatePackage(*PathPackage);
-        FName StaticMeshName = MakeUniqueObjectName(Package, UStaticMesh::StaticClass(), FName(*ObjectName));
+        const FName StaticMeshName = MakeUniqueObjectName(Package, UStaticMesh::StaticClass(), FName(*ObjectName));
         UPackage * MeshPackage = CreatePackage(*FPaths::Combine(PathPackage, StaticMeshName.ToString()));
 
         // Create Static Mesh
@@ -42,8 +42,7 @@ public:
         if(StaticMesh)
         {
             FRawMesh RawMesh = FRawMesh();
-            FColor ColorBlack = FColor(0,0,0,255);
-
+            
             // add vertices
             for(auto &v : Geometry.Vertices)
             {

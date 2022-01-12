@@ -9,7 +9,7 @@
 
 FVector UBPFLSpatialGeometryTools::GetCenterOfMass(const TArray<FVector> Vertices)
 {
-    return VectorHelper::CenterOfMass(Vertices);
+    return FVectorHelper::CenterOfMass(Vertices);
 }
 
 FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
@@ -18,7 +18,7 @@ FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
     const FVector P = Vertices[0];
     const FVector Q = Vertices[1];
     int j = 2;
-    while(j < Vertices.Num() && VectorHelper::IsLine({P,Q,Vertices[j]}))
+    while(j < Vertices.Num() && FVectorHelper::IsLine({P,Q,Vertices[j]}))
         j++;
 
     if(j >= Vertices.Num())
@@ -28,7 +28,7 @@ FVector UBPFLSpatialGeometryTools::GetPolygonNormal(TArray<FVector> Vertices)
     }
 
     const FVector R = Vertices[j];
-    return VectorHelper::MakeFaceNormal(P,Q,R);
+    return FVectorHelper::MakeFaceNormal(P,Q,R);
 }
 
 FGeometryData UBPFLSpatialGeometryTools::MakeFace(const TArray<FVector> Vertices, const bool bClockwise)
