@@ -46,7 +46,7 @@ public:
             // add vertices
             for(auto &v : Geometry.Vertices)
             {
-                RawMesh.VertexPositions.Add(v);
+                RawMesh.VertexPositions.Add(FVector3f(v));
             }
             // add faces, normals, ...
             for (int i = 0; i < Geometry.Indices.Num() - 2; i+=3)
@@ -59,26 +59,26 @@ public:
                 RawMesh.WedgeColors.Add(Geometry.Colors[Geometry.Indices[i+1]].ToFColor(false));
                 RawMesh.WedgeColors.Add(Geometry.Colors[Geometry.Indices[i+2]].ToFColor(false));
 
-                RawMesh.WedgeTangentX.Add(Geometry.Tangents[Geometry.Indices[i+0]].TangentX);
-                RawMesh.WedgeTangentX.Add(Geometry.Tangents[Geometry.Indices[i+1]].TangentX);
-                RawMesh.WedgeTangentX.Add(Geometry.Tangents[Geometry.Indices[i+2]].TangentX);
+                RawMesh.WedgeTangentX.Add(FVector3f(Geometry.Tangents[Geometry.Indices[i+0]].TangentX));
+                RawMesh.WedgeTangentX.Add(FVector3f(Geometry.Tangents[Geometry.Indices[i+1]].TangentX));
+                RawMesh.WedgeTangentX.Add(FVector3f(Geometry.Tangents[Geometry.Indices[i+2]].TangentX));
 
-                RawMesh.WedgeTangentY.Add(FVector::ZeroVector);
-                RawMesh.WedgeTangentY.Add(FVector::ZeroVector);
-                RawMesh.WedgeTangentY.Add(FVector::ZeroVector);
+                RawMesh.WedgeTangentY.Add(FVector3f::ZeroVector);
+                RawMesh.WedgeTangentY.Add(FVector3f::ZeroVector);
+                RawMesh.WedgeTangentY.Add(FVector3f::ZeroVector);
 
-                RawMesh.WedgeTangentZ.Add(Geometry.Normals[Geometry.Indices[i+0]]);
-                RawMesh.WedgeTangentZ.Add(Geometry.Normals[Geometry.Indices[i+1]]);
-                RawMesh.WedgeTangentZ.Add(Geometry.Normals[Geometry.Indices[i+2]]);
+                RawMesh.WedgeTangentZ.Add(FVector3f(Geometry.Normals[Geometry.Indices[i+0]]));
+                RawMesh.WedgeTangentZ.Add(FVector3f(Geometry.Normals[Geometry.Indices[i+1]]));
+                RawMesh.WedgeTangentZ.Add(FVector3f(Geometry.Normals[Geometry.Indices[i+2]]));
 
                 RawMesh.FaceMaterialIndices.Add(0);
                 RawMesh.FaceSmoothingMasks.Add(0xFFFFFFFF); // Phong
 
                 for(int UVIndex = 0; UVIndex < MAX_MESH_TEXTURE_COORDS; UVIndex++)
                 {
-                    RawMesh.WedgeTexCoords[UVIndex].Add(Geometry.TexCoords[Geometry.Indices[i+0]]);
-                    RawMesh.WedgeTexCoords[UVIndex].Add(Geometry.TexCoords[Geometry.Indices[i+1]]);
-                    RawMesh.WedgeTexCoords[UVIndex].Add(Geometry.TexCoords[Geometry.Indices[i+2]]);
+                    RawMesh.WedgeTexCoords[UVIndex].Add(FVector2f(Geometry.TexCoords[Geometry.Indices[i+0]]));
+                    RawMesh.WedgeTexCoords[UVIndex].Add(FVector2f(Geometry.TexCoords[Geometry.Indices[i+1]]));
+                    RawMesh.WedgeTexCoords[UVIndex].Add(FVector2f(Geometry.TexCoords[Geometry.Indices[i+2]]));
                 }
             }
 
