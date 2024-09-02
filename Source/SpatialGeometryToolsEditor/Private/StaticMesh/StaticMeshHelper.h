@@ -8,6 +8,7 @@
 #include "GeometryDataHelper.h"
 #include "RawMesh.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "PhysicsEngine/BodySetup.h"
 
 /**
 *
