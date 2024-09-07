@@ -170,7 +170,13 @@ TArray<int32> PolygonHelper::TessellatePolygon(const TArray<FVector> &Vertices, 
     // tessellate using earcut
     const std::vector<N> Indices = mapbox::earcut<N>(Polygon);
 
+    // prevent crashes when earcut returns an empty array
     TArray<int32> Ret;
+    if(Indices.size() <= 0)
+    {
+        return Ret;
+    }
+    
     for(int i = 0; i < Indices.size() - 2; i += 3) {
         //if(!PolygonHelper::IsClockwise({Vertices[Indices[i]], Vertices[Indices[i+1]], Vertices[Indices[i+2]]}))
         if(bClockwise)
